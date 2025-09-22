@@ -40,18 +40,19 @@ def insert():
     if request.method == 'POST':
         quake_id = request.form['id']
         time_val = request.form['time']
-        latitude = request.form['latitude']
-        longitude = request.form['longitude']
-        depth = request.form['depth']
+        latitude = request.form['lat']
+        longitude = request.form['long']
         mag = request.form['mag']
-        place = request.form['place']
+        nst = request.form['nst']
+        net = request.form['net']
 
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Earthquakes (id, time, latitude, longitude, depth, mag, place)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, quake_id, time_val, latitude, longitude, depth, mag, place)
+                    INSERT INTO Earthquakes2 (id, time, latitude, longitude, mag, nst, net)
+                    SELECT ?, ?, ?, ?, ?, ?, ?
+                    WHERE NOT EXISTS (SELECT 1 FROM Earthquakes2 WHERE id = ?)
+                """, quake_id, time_val, latitude, longitude, mag, nst, net, quake_id)
         conn.commit()
         cursor.close()
         conn.close()
@@ -87,8 +88,8 @@ def query():
             max_mag = request.form.get('max_mag', 10)
 
             query = """
-                    SELECT id, time, latitude, longitude, depth, mag, place
-                    FROM Earthquakes
+                    SELECT id, time, latitude, longitude
+                    FROM Earthquakes2
                     WHERE mag BETWEEN ? AND ?
                     ORDER BY time DESC
                 """
