@@ -28,7 +28,7 @@ def get_connection():
         f'PWD={password};'
         f'Encrypt=yes;'
         f'TrustServerCertificate=no;'
-        f'Connection Timeout=300;'
+        f'Connection Timeout=30;'
     )
 
 @app.route('/')
