@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+  <h2>Confirm Deletion</h2>
+  <p>
+    Found <strong>{{ count_to_delete }}</strong> rows with
+    <code>net="{{ net_value }}"</code>.
+  </p>
+
+  {% if count_to_delete > 0 %}
+    <form method="post" action="{{ url_for('query') }}">
+      <input type="hidden" name="query_type" value="confirm_delete_net">
+      <input type="hidden" name="net_value" value="{{ net_value }}">
+      <button type="submit" class="btn btn-danger">Delete All</button>
+    </form>
+  {% else %}
+    <div class="alert alert-info">No rows found for that net value.</div>
+  {% endif %}
+
+  <a href="/" class="btn btn-secondary mt-3">Cancel</a>
+{% endblock %}

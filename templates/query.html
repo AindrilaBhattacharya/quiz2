@@ -17,25 +17,46 @@
     </div>
 </form>
 <hr>
-<h2>Find Earthquakes in a Certain Radius of Given Coordinates</h2>
+<h2>Find Earthquakes by Coordinates ± N Degrees and Magnitude Range</h2>
 <form method="post" class="row g-3">
     <input type="hidden" name="query_type" value="location">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <label>Latitude</label>
         <input type="number" step="0.0001" name="latitude" value="32.7357" class="form-control" required>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <label>Longitude</label>
         <input type="number" step="0.0001" name="longitude" value="-97.1081" class="form-control" required>
     </div>
-    <div class="col-md-4">
-        <label>Radius (km)</label>
-        <input type="number" step="1" name="radius_km" value="500" class="form-control" required>
+    <div class="col-md-3">
+        <label>± Degrees</label>
+        <input type="number" step="0.1" name="degrees" value="5" class="form-control" required>
+    </div>
+    <div class="col-md-3">
+        <label>Min Magnitude</label>
+        <input type="number" step="0.1" name="min_mag" value="0" class="form-control" required>
+    </div>
+    <div class="col-md-3">
+        <label>Max Magnitude</label>
+        <input type="number" step="0.1" name="max_mag" value="10" class="form-control" required>
     </div>
     <div class="col-12 text-center">
         <button type="submit" class="btn btn-success mt-3">Query</button>
     </div>
-    <!-- note: this is for 500 km within arlington, tx -->
+</form>
+<hr>
+<h2>Delete All Earthquakes by Net Value</h2>
+<form method="post" class="row g-3">
+    <input type="hidden" name="query_type" value="delete_net">
+
+    <div class="col-md-6">
+        <label>Net Value</label>
+        <input type="text" name="net_value" class="form-control" required>
+    </div>
+
+    <div class="col-12 text-center">
+        <button type="submit" class="btn btn-success mt-3">Query</button>
+    </div>
 </form>
 <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
 {% endblock %}

@@ -28,7 +28,7 @@ def get_connection():
         f'PWD={password};'
         f'Encrypt=yes;'
         f'TrustServerCertificate=no;'
-        f'Connection Timeout=30;'
+        f'Connection Timeout=300;'
     )
 
 @app.route('/')
@@ -99,31 +99,43 @@ def query():
         elif query_type == 'location':
             center_lat = float(request.form.get('latitude'))
             center_lon = float(request.form.get('longitude'))
-            radius_km = float(request.form.get('radius_km', 500))
+            degrees = float(request.form.get('degrees'))
+            min_mag = float(request.form.get('min_mag'))
+            max_mag = float(request.form.get('max_mag'))
 
             sql = """
-                SELECT id, time, latitude, longitude, depth, mag, place,
-                       6371 * ACOS(
-                           COS(RADIANS(?)) * COS(RADIANS(latitude)) *
-                           COS(RADIANS(longitude) - RADIANS(?)) +
-                           SIN(RADIANS(?)) * SIN(RADIANS(latitude))
-                       ) AS distance_km
-                FROM Earthquakes
-                WHERE 6371 * ACOS(
-                           COS(RADIANS(?)) * COS(RADIANS(latitude)) *
-                           COS(RADIANS(longitude) - RADIANS(?)) +
-                           SIN(RADIANS(?)) * SIN(RADIANS(latitude))
-                       ) <= ?
-                ORDER BY time DESC
-            """
-            params = [center_lat, center_lon, center_lat,
-                      center_lat, center_lon, center_lat, radius_km]
+                    SELECT id, time, latitude, longitude, mag
+                    FROM Earthquakes
+                    WHERE latitude BETWEEN ? AND ?
+                    AND longitude BETWEEN ? AND ?
+                    AND mag BETWEEN ? AND ?
+                    ORDER BY time DESC
+                """
+            params = [center_lat-degrees, center_lat+degrees, 
+                      center_lon-degrees, center_lon+degrees,
+                      min_mag, max_mag]
             df = pd.read_sql(sql, conn, params=params)
+        
+        elif query_type == 'delete_net':
+            net = request.form.get('net_value')
+
+            sql = """SELECT COUNT(*) FROM Earthquakes2 WHERE net = ?"""
+            params = [net]
+            df = pd.read_sql(sql, conn, params=params)
+
+            count_to_delete = int(df.iloc[0])
+
+            return render_template(
+                "confirm_delete.html",
+                net_value=net,
+                count_to_delete=count_to_delete
+            )
 
         conn.close()
         # Remove leading/trailing whitespace characters from string columns
-        html_table = df.to_html(classes='table table-striped', index=False).replace('\n', '')
-        return render_template('results.html', tables=[html_table], titles=df.columns.values)
+        if query_type != 'delete_net':
+            html_table = df.to_html(classes='table table-striped', index=False).replace('\n', '')
+            return render_template('results.html', tables=[html_table], titles=df.columns.values)
 
     return render_template('query.html')
 
