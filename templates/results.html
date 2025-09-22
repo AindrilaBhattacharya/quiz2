@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2 class="text-center">Query Results</h2>
+
+{% if elapsed_time %}
+<div class="alert alert-info text-center">
+    <strong>Query Execution Time:</strong> {{ elapsed_time }}
+</div>
+{% endif %}
+
+{% if cache_status %}
+<div class="alert alert-secondary text-center">
+    <strong>Status:</strong> {{ cache_status }}
+</div>
+{% endif %}
+
+<div class="table-responsive">
+    {{ tables|safe }}
+</div>
+
+<div class="text-center">
+    <a href="/query" class="btn btn-primary mt-3">New Query</a>
+    <a href="/" class="btn btn-secondary mt-3">Home</a>
+</div>
+
+{% endblock %}

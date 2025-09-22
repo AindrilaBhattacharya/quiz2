@@ -1,0 +1,6 @@
+Flask
+pandas
+pyodbc
+python-dotenv
+gunicorn
+redis
