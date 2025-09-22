@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Delete Complete</h2>
+<p>Deleted {{ deleted_rows }} rows with net = "{{ net_value }}"</p>
+<a href="{{ url_for('query') }}" class="btn btn-primary">Back to Queries</a>
+{% endblock %}

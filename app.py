@@ -94,6 +94,9 @@ def query():
                     ORDER BY time DESC
                 """
             df = pd.read_sql(query, conn, params=[min_mag, max_mag])
+            conn.close()
+            html_table = df.to_html(classes='table table-striped', index=False).replace('\n', '')
+            return render_template('results.html', tables=[html_table], titles=df.columns.values)
             
 
         elif query_type == 'location':
@@ -115,27 +118,45 @@ def query():
                       center_lon-degrees, center_lon+degrees,
                       min_mag, max_mag]
             df = pd.read_sql(sql, conn, params=params)
+            conn.close()
+            html_table = df.to_html(classes='table table-striped', index=False).replace('\n', '')
+            return render_template('results.html', tables=[html_table], titles=df.columns.values)
         
         elif query_type == 'delete_net':
             net = request.form.get('net_value')
 
-            sql = """SELECT COUNT(*) FROM Earthquakes2 WHERE net = ?"""
+            sql = """SELECT COUNT(*) AS cnt FROM Earthquakes2 WHERE net = ?"""
             params = [net]
             df = pd.read_sql(sql, conn, params=params)
-
-            count_to_delete = int(df.iloc[0])
+            conn.close()
+            count_to_delete = int(df.iloc[0]['cnt'])
 
             return render_template(
                 "confirm_delete.html",
                 net_value=net,
                 count_to_delete=count_to_delete
             )
+        elif query_type == 'confirm_delete_net':
+            net = request.form.get('net_value')
 
-        conn.close()
-        # Remove leading/trailing whitespace characters from string columns
-        if query_type != 'delete_net':
-            html_table = df.to_html(classes='table table-striped', index=False).replace('\n', '')
-            return render_template('results.html', tables=[html_table], titles=df.columns.values)
+            sql = """DELETE FROM Earthquakes2 WHERE net = ?"""
+
+            cur = conn.cursor()
+            cur.execute(sql, (net,))
+            conn.commit()
+            deleted_rows = cur.rowcount
+            conn.close()
+
+            return render_template(
+                "delete_success.html",
+                net_value=net,
+                deleted_rows=deleted_rows
+            )
+            
+        # # Remove leading/trailing whitespace characters from string columns
+        # if query_type != 'delete_net':
+        #     html_table = df.to_html(classes='table table-striped', index=False).replace('\n', '')
+        #     return render_template('results.html', tables=[html_table], titles=df.columns.values)
 
     return render_template('query.html')
 
